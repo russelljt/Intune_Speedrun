@@ -1,0 +1,206 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Initialize Environment",
+      "type": "shell",
+      "command": [
+        "./tasks/Initialize.Environment.ps1"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Intune Speedrun -Windows",
+      "type": "shell",
+      "command": [
+        "./0_test/Setup-IntuneWindows.ps1"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Intune Speedrun",
+      "type": "shell",
+      "command": [
+        "./1_tenant_config/Setup-Intune.ps1"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "PublishMSI",
+      "type": "shell",
+      "command": [
+        "2_app_deploy/_MSI-LOB/Add-LOBApp.ps1"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build",
+      "type": "shell",
+      "command": [
+        "./tasks/Invoke.Build.ps1 -appConfig '${file}' -buildFrom '${input:buildType}'"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Publish",
+      "type": "shell",
+      "command": [
+        "./tasks/Deploy.Intunewin.ps1 -appConfig '${file}' -user ${input:user}"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "runOptions": {
+        "reevaluateOnRerun": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build & Publish",
+      "type": "shell",
+      "dependsOn": [
+        "Build"
+      ],
+      "command": [
+        "./tasks/Deploy.Intunewin.ps1 -appConfig '${file}' -user ${input:user}"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "runOptions": {
+        "reevaluateOnRerun": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Get MSI Codes",
+      "type": "shell",
+      "command": [
+        "./tasks/Get-MSICode.ps1 -Path '${input:MSIFile}' -Property ${input:MSIProperty}"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "runOptions": {
+        "reevaluateOnRerun": false
+      },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "buildType",
+      "type": "pickString",
+      "description": "Where's the location of the install media?",
+      "options": [
+        "Remote",
+        "Local"
+      ],
+      "default": "Local"
+    },
+    {
+      "type": "promptString",
+      "id": "user",
+      "description": "Enter the domain admin account UPN for deployment.."
+    },
+    {
+      "type": "promptString",
+      "id": "MSIFile",
+      "description": "Full path to the MSIFile Please"
+    },
+    {
+      "id": "MSIProperty",
+      "type": "pickString",
+      "description": "Which MSI Property do you want returned?",
+      "options": [
+        "ProductCode",
+        "ProductVersion",
+        "ProductName",
+        "Manufacturer",
+        "ProductLanguage",
+        "FullVersion"
+      ],
+      "default": "ProductCode"
+    }
+  ]
+}
