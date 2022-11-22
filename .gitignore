@@ -1,0 +1,8 @@
+bin
+*.intunewin
+*.msi
+*.exe
+*.zip
+
+0_test/
+tasklist.md
